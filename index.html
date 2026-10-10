@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sokary's Family</title>
+<style>
+  :root { --blue:#1E6FFF; --navy:#0A1F44; --light:#EAF2FF; --card:#FFFFFF; --text:#0A1F44; --muted:#5A6B8C; --border:#D6E2F5; --red:#E5484D; --green:#16A34A; --field:#F5F8FD; }
+  @media (prefers-color-scheme: dark) {
+    :root { --light:#0A1F44; --card:#122B57; --text:#F2F6FF; --muted:#9FB3D6; --border:#24457A; --field:#0A1F44; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: Inter, system-ui, sans-serif; background:var(--light); color:var(--text); min-height:100vh; }
+  button { font:inherit; cursor:pointer; border:none; border-radius:12px; }
+  input, select { font:inherit; width:100%; height:44px; border-radius:12px; border:1px solid var(--border); background:var(--field); color:var(--text); padding:0 12px; font-size:15px; }
+  input:focus, select:focus { outline:2px solid var(--blue); outline-offset:0; }
+  .hidden { display:none !important; }
+  .wrap { max-width:460px; margin:0 auto; padding:16px 16px 110px; }
+  .auth-wrap { max-width:420px; margin:0 auto; padding:32px 16px; }
+  .logo { display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:20px; }
+  .logo svg { width:64px; height:64px; }
+  .brand { font-size:24px; font-weight:800; color:var(--blue); }
+  .card { background:var(--card); border-radius:20px; padding:18px; margin-top:14px; box-shadow:0 8px 24px rgba(10,31,68,.07); }
+  h2 { margin:0 0 12px; font-size:18px; font-weight:700; }
+  h3 { margin:12px 0 8px; font-size:15px; font-weight:700; }
+  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
+  .stack > * + * { margin-top:8px; }
+  .primary { width:100%; height:46px; background:var(--blue); color:#fff; font-size:15px; font-weight:700; margin-top:12px; transition:transform .15s; }
+  .primary:active, .btn:active, .nav button:active { transform:scale(.96); }
+  .btn { height:36px; padding:0 12px; background:transparent; color:var(--text); border:1px solid var(--border); font-size:13px; font-weight:600; transition:transform .15s; white-space:nowrap; }
+  .btn.p { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .btn.d { color:var(--red); }
+  .btn.g { color:var(--green); }
+  .link { background:none; color:var(--blue); font-size:14px; padding:8px; width:100%; margin-top:4px; }
+  .msg { font-size:14px; font-weight:600; text-align:center; min-height:20px; margin-top:12px; }
+  .ok { color:var(--green); } .no { color:var(--red); }
+  .muted { color:var(--muted); font-size:13px; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .row.wrap2 { flex-wrap:wrap; }
+  .grow { flex:1; min-width:0; }
+  .amt { font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .item { display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--border); }
+  .item:first-child { border-top:none; }
+  .chip { width:36px; height:36px; border-radius:12px; flex:none; }
+  .hero { background:var(--blue); color:#fff; border-radius:22px; padding:20px; margin-top:14px; }
+  .hero .muted { color:rgba(255,255,255,.85); }
+  .hero .bal { font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; margin:4px 0 14px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid2 .v { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .bar { height:8px; border-radius:4px; background:rgba(255,255,255,.3); margin-top:14px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:#fff; border-radius:4px; transition:width .6s; }
+  .lbar { height:8px; border-radius:4px; background:var(--field); overflow:hidden; margin-top:6px; }
+  .lbar i { display:block; height:100%; background:var(--blue); border-radius:4px; transition:width .6s; }
+  .warn { background:#FEF3C7; color:#854F0B; border-radius:14px; padding:10px 14px; font-size:13px; margin-top:14px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; }
+  .topbar .brand { font-size:18px; }
+  .month { display:flex; align-items:center; gap:6px; background:var(--card); border-radius:14px; padding:4px; }
+  .month button { background:transparent; color:var(--text); width:32px; height:32px; font-size:18px; border-radius:10px; }
+  .month span { font-size:14px; font-weight:700; min-width:110px; text-align:center; }
+  .nav { position:fixed; left:0; right:0; bottom:0; background:var(--card); border-top:1px solid var(--border); display:grid; grid-template-columns:repeat(5,1fr); padding:6px 4px; }
+  .nav button { background:transparent; color:var(--muted); font-size:11px; padding:6px 0; display:flex; flex-direction:column; align-items:center; gap:2px; transition:transform .15s; }
+  .nav button.on { color:var(--blue); font-weight:700; }
+  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:90px; background:var(--navy); color:#fff; padding:10px 16px; border-radius:12px; font-size:14px; max-width:90%; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:5; }
+  .toast.err { background:var(--red); }
+  .bars { display:flex; align-items:flex-end; gap:10px; height:150px; padding-top:8px; }
+  .bcol { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:4px; }
+  .bpair { display:flex; align-items:flex-end; gap:3px; height:120px; width:100%; justify-content:center; }
+  .bpair i { width:40%; border-radius:6px 6px 0 0; display:block; min-height:2px; }
+  .legend { display:flex; gap:14px; font-size:12px; color:var(--muted); margin-top:6px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+  .divider { height:1px; background:var(--border); margin:16px 0; }
+  .note { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div id="auth" class="auth-wrap hidden"></div>
+<div id="app" class="wrap hidden">
+  <div class="topbar">
+    <div class="brand">Sokary's Family</div>
+    <div class="month">
+      <button data-act="prev" aria-label="Previous month">&#8249;</button>
+      <span id="monthLabel"></span>
+      <button data-act="next" aria-label="Next month">&#8250;</button>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+<div class="nav hidden" id="nav"></div>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ================= LOGO =================
+const LOGO = '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1E6FFF"/><path d="M256 110 L404 232 V404 Q404 420 388 420 H124 Q108 420 108 404 V232 Z" fill="#FFFFFF"/><circle cx="256" cy="318" r="62" fill="#F5C451"/><circle cx="256" cy="318" r="44" fill="none" stroke="#C28A1A" stroke-width="8"/></svg>';
+
+// ================= CATEGORIES & QUESTIONS =================
+const CATS = {
+  food:{n:'Food',c:'#1E6FFF'}, transport:{n:'Transport',c:'#7C3AED'}, shopping:{n:'Shopping',c:'#EC4899'},
+  health:{n:'Health',c:'#16A34A'}, bills:{n:'Bills',c:'#F59E0B'}, entertainment:{n:'Entertainment',c:'#06B6D4'},
+  housing:{n:'Housing',c:'#EF4444'}, other:{n:'Other',c:'#64748B'}
+};
+const QUESTIONS = ['What was your first school name?','What is your mother\'s first name?','What city were you born in?','What is your first pet\'s name?'];
+
+// ================= STATE =================
+let users = JSON.parse(localStorage.getItem('sf_users') || '[]');
+let me = null;            // logged-in user record
+let settings = {};        // per-user preferences
+let D = { incomes:[], vars:[], fixed:[], pays:[], goals:[] };
+const ui = { tab:'home', month: new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'), mode:'login', resetUser:null, authMsg:'', authOk:false };
+
+// ================= HELPERS =================
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const monthKey = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const todayStr = () => isoDate(new Date());
+const todayD = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const toMinor = (a) => Math.round(a * 100);
+const sum = (arr, f) => arr.reduce((s, x) => s + Number(f(x) || 0), 0);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const val = (id) => ($(id)?.value ?? '').trim();
+const num = (id) => parseFloat($(id)?.value);
+const catName = (k) => (CATS[k] ? CATS[k].n : 'Other');
+const catColor = (k) => (CATS[k] ? CATS[k].c : '#64748B');
+const money = (minor) => new Intl.NumberFormat('en-US', { style:'currency', currency: settings.cur || 'EGP', maximumFractionDigits: 2 }).format(minor / 100);
+const monthLabel = (ym) => { const [y,m] = ym.split('-').map(Number); return new Date(y, m-1, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' }); };
+const emailOk = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+
+// Small fast hash (cyrb53). Good enough to keep passwords out of plain text on this device.
+function hash(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+function addMonths(ym, delta) { const [y, m] = ym.split('-').map(Number); return monthKey(new Date(y, m - 1 + delta, 1)); }
+function dueDate(ym, day) { const [y, m] = ym.split('-').map(Number); const last = new Date(y, m, 0).getDate(); return new Date(y, m - 1, Math.min(day, last)); }
+function firstCharge(day) { const t = todayD(), tm = monthKey(t); return dueDate(tm, day) < t ? addMonths(tm, 1) : tm; }
+const paidIn = (fid, m) => D.pays.some((p) => p.fid === fid && p.ym === m);
+
+function toast(msg, isErr) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'toast' + (isErr ? ' err' : '');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), 2600);
+}
+
+// ================= STORAGE =================
+function saveUsers() { localStorage.setItem('sf_users', JSON.stringify(users)); }
+function saveData() { if (me) localStorage.setItem('sf_data_' + me.id, JSON.stringify(D)); }
+function loadData(id) {
+  const raw = localStorage.getItem('sf_data_' + id);
+  D = raw ? JSON.parse(raw) : { incomes:[], vars:[], fixed:[], pays:[], goals:[] };
+  settings = JSON.parse(localStorage.getItem('sf_settings_' + id) || '{}');
+  settings = Object.assign({ cur:'EGP', low:500, dueDays:2 }, settings);
+}
+function saveSettings() { if (me) localStorage.setItem('sf_settings_' + me.id, JSON.stringify(settings)); }
+
+// Records every fixed bill that has come due and is not paid yet.
+function processDue() {
+  const tm = monthKey(new Date()), t = todayD();
+  let added = false;
+  for (const f of D.fixed) {
+    if (f.paused) continue;
+    let m = f.start;
+    while (m <= tm) {
+      if (dueDate(m, f.day) > t) break;
+      if (!paidIn(f.id, m)) {
+        D.pays.push({ id: uid(), fid: f.id, name: f.name, cat: f.cat, ym: m, amt: f.amt, on: isoDate(dueDate(m, f.day)) });
+        added = true;
+      }
+      m = addMonths(m, 1);
+    }
+  }
+  if (added) saveData();
+}
+
+function calc() {
+  const m = ui.month;
+  const bal = sum(D.incomes, x => x.amt) - sum(D.vars, x => x.amt) - sum(D.pays, x => x.amt);
+  const incM = sum(D.incomes.filter(x => x.date.startsWith(m)), x => x.amt);
+  const varM = sum(D.vars.filter(x => x.date.startsWith(m)), x => x.amt);
+  const payM = sum(D.pays.filter(x => x.ym === m), x => x.amt);
+  const remaining = sum(D.fixed.filter(f => !f.paused && f.start <= m && !paidIn(f.id, m)), f => f.amt);
+  return { bal, incM, spentM: varM + payM, remaining, safe: bal - remaining };
+}
+
+function ledger(m) {
+  const rows = [];
+  D.incomes.filter(x => x.date.startsWith(m)).forEach(x => rows.push({ d:x.date, out:false, l:x.src, a:x.amt }));
+  D.vars.filter(x => x.date.startsWith(m)).forEach(x => rows.push({ d:x.date, out:true, l:x.note || catName(x.cat), a:x.amt }));
+  D.pays.filter(x => x.ym === m).forEach(x => rows.push({ d:x.on, out:true, l:x.name, a:x.amt }));
+  return rows.sort((a, b) => (a.d < b.d ? 1 : -1));
+}
+
+// ================= AUTH SCREENS =================
+function renderAuth() {
+  const m = ui.mode;
+  let body = '';
+  if (m === 'login') {
+    body = `
+      <h2>Welcome back</h2>
+      <label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email">
+      <label for="aPw">Password</label><input id="aPw" type="password" autocomplete="current-password">
+      <button class="primary" data-act="login">Log in</button>
+      <div class="divider"></div>
+      <button class="link" data-act="go" data-to="signup">No account? Create one</button>
+      <button class="link" data-act="go" data-to="forgot">Forgot password?</button>`;
+  } else if (m === 'signup') {
+    body = `
+      <h2>Create your account</h2>
+      <label for="aName">Full name</label><input id="aName" autocomplete="name">
+      <label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email">
+      <label for="aPw">Password (8+ characters)</label><input id="aPw" type="password" autocomplete="new-password">
+      <label for="aPw2">Confirm password</label><input id="aPw2" type="password" autocomplete="new-password">
+      <label for="aQ">Security question (used to reset your password)</label>
+      <select id="aQ">${QUESTIONS.map((q) => `<option>${esc(q)}</option>`).join('')}</select>
+      <label for="aQA">Answer</label><input id="aQA" autocomplete="off">
+      <button class="primary" data-act="signup">Create account</button>
+      <div class="divider"></div>
+      <button class="link" data-act="go" data-to="login">Back to log in</button>`;
+  } else if (m === 'forgot') {
+    body = `
+      <h2>Reset your password</h2>
+      <label for="aEmail">Your email</label><input id="aEmail" type="email" autocomplete="email">
+      <button class="primary" data-act="findUser">Continue</button>
+      <div class="divider"></div>
+      <button class="link" data-act="go" data-to="login">Back to log in</button>`;
+  } else if (m === 'reset') {
+    body = `
+      <h2>Answer your security question</h2>
+      <div class="muted" style="margin-bottom:8px">${esc(ui.resetUser.qq)}</div>
+      <label for="aQA">Answer</label><input id="aQA" autocomplete="off">
+      <label for="aPw">New password (8+ characters)</label><input id="aPw" type="password" autocomplete="new-password">
+      <label for="aPw2">Confirm new password</label><input id="aPw2" type="password" autocomplete="new-password">
+      <button class="primary" data-act="resetPw">Reset password</button>
+      <div class="divider"></div>
+      <button class="link" data-act="go" data-to="login">Back to log in</button>`;
+  }
+  $('auth').innerHTML = `
+    <div class="logo">${LOGO}<div class="brand">Sokary's Family</div></div>
+    <div class="card" style="margin-top:0">
+      ${body}
+      <div class="msg ${ui.authOk ? 'ok' : 'no'}" id="authMsg">${esc(ui.authMsg)}</div>
+    </div>`;
+  $('auth').classList.remove('hidden');
+  $('app').classList.add('hidden');
+  $('nav').classList.add('hidden');
+}
+
+function authError(text) { ui.authOk = false; ui.authMsg = text; renderAuth(); }
+function authInfo(text) { ui.authOk = true; ui.authMsg = text; renderAuth(); }
+
+function signUp() {
+  const name = val('aName'), email = val('aEmail').toLowerCase(), pw = $('aPw').value, pw2 = $('aPw2').value;
+  const qq = val('aQ'), qa = val('aQA').toLowerCase();
+  if (!name) return authError('Enter your name.');
+  if (!emailOk(email)) return authError('Enter a valid email.');
+  if (pw.length < 8) return authError('Use at least 8 characters for your password.');
+  if (pw !== pw2) return authError('Passwords do not match.');
+  if (!qa) return authError('Answer the security question. You need it to reset your password.');
+  if (users.some((u) => u.email === email)) return authError('An account with this email already exists. Log in instead.');
+  const salt = uid();
+  const user = { id: uid(), name, email, salt, pw: hash(salt + pw), qq, qa: hash(salt + qa), created: new Date().toISOString() };
+  users.push(user); saveUsers();
+  signIn(user);
+}
+
+function logIn() {
+  const email = val('aEmail').toLowerCase(), pw = $('aPw').value;
+  const u = users.find((x) => x.email === email);
+  if (!u || u.pw !== hash(u.salt + pw)) return authError('Wrong email or password.');
+  signIn(u);
+}
+
+function signIn(user) {
+  me = user;
+  localStorage.setItem('sf_session', user.id);
+  loadData(user.id);
+  processDue();
+  ui.mode = 'login'; ui.authMsg = ''; ui.authOk = false;
+  enterApp();
+}
+
+function findUser() {
+  const email = val('aEmail').toLowerCase();
+  const u = users.find((x) => x.email === email);
+  if (!u) return authError('No account with this email.');
+  ui.resetUser = u; ui.mode = 'reset'; ui.authMsg = ''; renderAuth();
+}
+
+function resetPassword() {
+  const u = ui.resetUser;
+  const qa = val('aQA').toLowerCase(), pw = $('aPw').value, pw2 = $('aPw2').value;
+  if (u.qa !== hash(u.salt + qa)) return authError('That answer is not correct.');
+  if (pw.length < 8) return authError('Use at least 8 characters.');
+  if (pw !== pw2) return authError('Passwords do not match.');
+  u.pw = hash(u.salt + pw); saveUsers();
+  ui.mode = 'login'; ui.resetUser = null;
+  authInfo('Password reset. You can log in now.');
+}
+
+function signOut() {
+  localStorage.removeItem('sf_session');
+  me = null; D = { incomes:[], vars:[], fixed:[], pays:[], goals:[] };
+  ui.tab = 'home'; ui.mode = 'login'; ui.authMsg = ''; ui.authOk = false;
+  renderAuth();
+}
+
+// ================= RENDER APP =================
+function enterApp() {
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('nav').classList.remove('hidden');
+  render();
+}
+
+function render() {
+  if (!me) return renderAuth();
+  $('monthLabel').textContent = monthLabel(ui.month);
+  const c = calc();
+  const views = { home: viewHome, expenses: viewExpenses, reports: viewReports, goals: viewGoals, settings: viewSettings };
+  $('content').innerHTML = views[ui.tab](c);
+  renderNav();
+}
+
+function renderNav() {
+  const tabs = [['home','ti-home','Home'],['expenses','ti-receipt-2','Expenses'],['reports','ti-chart-pie','Reports'],['goals','ti-flag','Goals'],['settings','ti-settings','Settings']];
+  $('nav').innerHTML = tabs.map(([k, ic, label]) =>
+    `<button class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}" aria-label="${label}"><i class="ti ${ic}" aria-hidden="true"></i><span>${label}</span></button>`).join('');
+}
+
+function opts(sel) { return Object.keys(CATS).map((k) => `<option value="${k}"${k === sel ? ' selected' : ''}>${CATS[k].n}</option>`).join(''); }
+
+function viewHome(c) {
+  const warns = [];
+  if (c.bal < settings.low * 100) warns.push(`Balance is below your alert of ${money(settings.low * 100)}.`);
+  const tm = monthKey(new Date()), t = todayD();
+  const soon = D.fixed.filter((f) => {
+    if (f.paused || paidIn(f.id, tm) || f.start > tm) return false;
+    const diff = Math.round((dueDate(tm, f.day) - t) / 86400000);
+    return diff >= 0 && diff <= settings.dueDays;
+  });
+  if (soon.length) warns.push(`${soon.length} bill(s) due within ${settings.dueDays} day(s).`);
+  const pct = c.bal > 0 ? Math.max(0, Math.min(100, (c.safe / c.bal) * 100)) : 0;
+  const rows = ledger(ui.month).slice(0, 10);
+  return `
+  <div class="hero">
+    <div class="muted">Current balance</div>
+    <div class="bal">${money(c.bal)}</div>
+    <div class="grid2">
+      <div><div class="muted">Income this month</div><div class="v">${money(c.incM)}</div></div>
+      <div><div class="muted">Spent this month</div><div class="v">${money(c.spentM)}</div></div>
+      <div><div class="muted">Fixed still due</div><div class="v">${money(c.remaining)}</div></div>
+      <div><div class="muted">Safe to spend</div><div class="v">${money(c.safe)}</div></div>
+    </div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+  </div>
+  ${warns.map((w) => `<div class="warn">${esc(w)}</div>`).join('')}
+  <div class="card">
+    <h2>Quick add</h2>
+    <div class="stack">
+      <input id="hAmt" type="number" min="0" step="0.01" placeholder="Amount">
+      <input id="hNote" placeholder="Note or source (optional)">
+      <select id="hCat">${opts('other')}</select>
+      <div class="row">
+        <button class="btn g grow" data-act="addIncome">+ Add income</button>
+        <button class="btn d grow" data-act="addExpense">− Add expense</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>History</h2>
+    ${rows.length ? rows.map((r) => `
+      <div class="item">
+        <div class="grow"><div>${esc(r.l)}</div><div class="muted">${esc(r.d)}</div></div>
+        <div class="amt" style="color:${r.out ? 'var(--red)' : 'var(--green)'}">${r.out ? '−' : '+'}${money(r.a)}</div>
+      </div>`).join('') : '<div class="muted">No transactions this month.</div>'}
+  </div>`;
+}
+
+function viewExpenses() {
+  const vars = D.vars.filter((x) => x.date.startsWith(ui.month));
+  return `
+  <div class="card">
+    <h2>Add expense</h2>
+    <div class="stack">
+      <input id="eAmt" type="number" min="0" step="0.01" placeholder="Amount">
+      <select id="eCat">${opts('food')}</select>
+      <input id="eNote" placeholder="Note (optional)">
+      <input id="eDate" type="date" value="${todayStr()}">
+      <button class="primary" data-act="addVar">Add expense</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Variable expenses</h2>
+    ${vars.length ? vars.map((v) => `
+      <div class="item">
+        <div class="chip" style="background:${catColor(v.cat)}"></div>
+        <div class="grow"><div>${esc(v.note || catName(v.cat))}</div><div class="muted">${esc(catName(v.cat))} · ${esc(v.date)}</div></div>
+        <div class="amt">${money(v.amt)}</div>
+        <button class="btn d" data-act="delVar" data-id="${v.id}" aria-label="Delete">✕</button>
+      </div>`).join('') : '<div class="muted">No variable expenses this month.</div>'}
+  </div>
+  <div class="card">
+    <h2>Add fixed bill</h2>
+    <div class="stack">
+      <input id="fName" placeholder="Name (rent, installment, internet)">
+      <input id="fAmt" type="number" min="0" step="0.01" placeholder="Amount per month">
+      <input id="fDue" type="number" min="1" max="31" placeholder="Due day (1-31)">
+      <select id="fCat">${opts('bills')}</select>
+      <button class="primary" data-act="addFix">Add fixed bill</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Fixed bills</h2>
+    ${D.fixed.length ? D.fixed.map((f) => {
+      const paid = paidIn(f.id, ui.month);
+      const status = paid ? '<span class="ok">Paid this month</span>' : f.paused ? '<span class="muted">Paused</span>' : `<span class="muted">Due day ${f.day}</span>`;
+      return `
+      <div class="item">
+        <div class="chip" style="background:${catColor(f.cat)}"></div>
+        <div class="grow"><div>${esc(f.name)}</div><div>${status}</div></div>
+        <div class="amt">${money(f.amt)}</div>
+      </div>
+      <div class="row wrap2" style="justify-content:flex-end;margin-bottom:6px">
+        ${!paid ? `<button class="btn p" data-act="payFix" data-id="${f.id}">Pay</button>` : ''}
+        <button class="btn" data-act="toggleFix" data-id="${f.id}">${f.paused ? 'Resume' : 'Pause'}</button>
+        <button class="btn d" data-act="delFix" data-id="${f.id}">Delete</button>
+      </div>`;
+    }).join('') : '<div class="muted">No fixed bills yet.</div>'}
+  </div>`;
+}
+
+function viewReports() {
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const m = addMonths(ui.month, -i);
+    const inc = sum(D.incomes.filter((x) => x.date.startsWith(m)), x => x.amt);
+    const exp = sum(D.vars.filter((x) => x.date.startsWith(m)), x => x.amt) + sum(D.pays.filter((x) => x.ym === m), x => x.amt);
+    months.push({ m, inc, exp });
+  }
+  const max = Math.max(1, ...months.map((x) => Math.max(x.inc, x.exp)));
+  const byCat = {};
+  D.vars.filter((x) => x.date.startsWith(ui.month)).forEach((x) => { byCat[x.cat] = (byCat[x.cat] || 0) + x.amt; });
+  D.pays.filter((x) => x.ym === ui.month).forEach((x) => { byCat[x.cat] = (byCat[x.cat] || 0) + x.amt; });
+  const total = Object.values(byCat).reduce((s, v) => s + v, 0);
+  const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  return `
+  <div class="card">
+    <h2>Income vs expenses</h2>
+    <div class="bars">
+      ${months.map((x) => `
+        <div class="bcol">
+          <div class="bpair">
+            <i style="height:${(x.inc / max) * 100}%;background:var(--green)"></i>
+            <i style="height:${(x.exp / max) * 100}%;background:var(--red)"></i>
+          </div>
+          <div class="muted" style="font-size:11px">${new Date(x.m + '-01').toLocaleDateString('en-US', { month:'short' })}</div>
+        </div>`).join('')}
+    </div>
+    <div class="legend"><span><span class="dot" style="background:var(--green)"></span>Income</span><span><span class="dot" style="background:var(--red)"></span>Expenses</span></div>
+  </div>
+  <div class="card">
+    <h2>Spending by category</h2>
+    ${cats.length ? cats.map(([k, v]) => `
+      <div style="margin-bottom:12px">
+        <div class="row"><span>${esc(catName(k))}</span><span class="amt">${money(v)}</span></div>
+        <div class="lbar"><i style="width:${total ? (v / total) * 100 : 0}%;background:${catColor(k)}"></i></div>
+      </div>`).join('') : '<div class="muted">No spending this month.</div>'}
+  </div>`;
+}
+
+function viewGoals() {
+  return `
+  <div class="card">
+    <h2>Savings goals</h2>
+    ${D.goals.length ? D.goals.map((g) => {
+      const pct = g.target ? Math.min(100, Math.round(g.saved / g.target * 100)) : 0;
+      const done = g.saved >= g.target;
+      return `
+      <div style="padding:12px 0;border-top:1px solid var(--border)">
+        <div class="row"><div class="grow">${esc(g.name)}</div><div class="amt">${money(g.saved)} / ${money(g.target)}</div></div>
+        <div class="lbar"><i style="width:${pct}%"></i></div>
+        <div class="row wrap2" style="margin-top:8px">
+          <span class="muted">${done ? '<span class="ok">Completed</span>' : pct + '%'}</span>
+          <div class="row" style="gap:6px;flex:1;justify-content:flex-end">
+            ${done ? '' : `<input id="g-${g.id}" type="number" min="0" step="0.01" placeholder="Amount" style="height:36px;width:110px"><button class="btn p" data-act="saveGoal" data-id="${g.id}">Add</button>`}
+            <button class="btn d" data-act="delGoal" data-id="${g.id}">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : '<div class="muted">No goals yet. Create one below.</div>'}
+  </div>
+  <div class="card">
+    <h2>New goal</h2>
+    <div class="stack">
+      <input id="gName" placeholder="Goal name (for example, New car)">
+      <input id="gTarget" type="number" min="0" step="0.01" placeholder="Target amount">
+      <button class="primary" data-act="addGoal">Create goal</button>
+    </div>
+  </div>`;
+}
+
+function viewSettings() {
+  return `
+  <div class="card">
+    <h2>Preferences</h2>
+    <label for="sCur">Currency</label>
+    <select id="sCur">${['EGP','USD','SAR','AED','EUR'].map((c) => `<option${c === settings.cur ? ' selected' : ''}>${c}</option>`).join('')}</select>
+    <label for="sLow">Low balance alert</label>
+    <input id="sLow" type="number" min="0" value="${settings.low}">
+    <label for="sDue">Bill reminder (days before due)</label>
+    <select id="sDue">${[1,2,3,5,7].map((d) => `<option value="${d}"${d === settings.dueDays ? ' selected' : ''}>${d}</option>`).join('')}</select>
+    <button class="primary" data-act="saveSettings">Save preferences</button>
+  </div>
+  <div class="card">
+    <h2>Account</h2>
+    <div class="muted">Signed in as</div>
+    <div style="font-weight:700;margin-bottom:12px">${esc(me.name)} · ${esc(me.email)}</div>
+    <h3>Change password</h3>
+    <div class="stack">
+      <input id="cpCur" type="password" placeholder="Current password" autocomplete="current-password">
+      <input id="cpNew" type="password" placeholder="New password (8+ characters)" autocomplete="new-password">
+      <input id="cpNew2" type="password" placeholder="Confirm new password" autocomplete="new-password">
+      <button class="btn p" data-act="changePw">Change password</button>
+    </div>
+    <div class="divider"></div>
+    <div class="row wrap2">
+      <button class="btn" data-act="signOut">Sign out</button>
+      <button class="btn d" data-act="deleteAcc">Delete account</button>
+    </div>
+    <div class="note">Your data is stored in this browser only. To use the app on another device, sign up there separately.</div>
+  </div>`;
+}
+
+// ================= ACTIONS =================
+function needAmount(id) {
+  const a = num(id);
+  if (!a || a <= 0) { toast('Enter an amount greater than zero.', true); return null; }
+  return a;
+}
+
+function act(a, el) {
+  const id = el.dataset.id;
+  switch (a) {
+    case 'go': ui.mode = el.dataset.to; ui.authMsg = ''; return renderAuth();
+    case 'login': return logIn();
+    case 'signup': return signUp();
+    case 'findUser': return findUser();
+    case 'resetPw': return resetPassword();
+
+    case 'tab': ui.tab = el.dataset.tab; return render();
+    case 'prev': ui.month = addMonths(ui.month, -1); return render();
+    case 'next': ui.month = addMonths(ui.month, 1); return render();
+
+    case 'addIncome': {
+      const amt = needAmount('hAmt'); if (amt === null) return;
+      D.incomes.push({ id: uid(), amt: toMinor(amt), src: val('hNote') || 'Income', date: todayStr() });
+      break;
+    }
+    case 'addExpense': {
+      const amt = needAmount('hAmt'); if (amt === null) return;
+      D.vars.push({ id: uid(), amt: toMinor(amt), cat: val('hCat') || 'other', date: todayStr(), note: val('hNote') });
+      break;
+    }
+    case 'addVar': {
+      const amt = needAmount('eAmt'); if (amt === null) return;
+      D.vars.push({ id: uid(), amt: toMinor(amt), cat: val('eCat'), date: val('eDate') || todayStr(), note: val('eNote') });
+      break;
+    }
+    case 'delVar': {
+      if (!confirm('Delete this expense?')) return;
+      D.vars = D.vars.filter((x) => x.id !== id); break;
+    }
+    case 'addFix': {
+      const name = val('fName'); const amt = needAmount('fAmt'); if (amt === null) return;
+      const day = parseInt(val('fDue'), 10);
+      if (!name) return toast('Enter a name for the bill.', true);
+      if (!day || day < 1 || day > 31) return toast('Due day must be between 1 and 31.', true);
+      D.fixed.push({ id: uid(), name, amt: toMinor(amt), cat: val('fCat'), day, start: firstCharge(day), paused: false });
+      processDue(); break;
+    }
+    case 'payFix': {
+      const f = D.fixed.find((x) => x.id === id); if (!f) return;
+      if (paidIn(f.id, ui.month)) return toast('Already paid this month.', true);
+      D.pays.push({ id: uid(), fid: f.id, name: f.name, cat: f.cat, ym: ui.month, amt: f.amt, on: isoDate(dueDate(ui.month, f.day)) });
+      break;
+    }
+    case 'toggleFix': {
+      const f = D.fixed.find((x) => x.id === id); if (!f) return;
+      if (f.paused) f.start = firstCharge(f.day);
+      f.paused = !f.paused;
+      processDue(); break;
+    }
+    case 'delFix': {
+      if (!confirm('Delete this bill? Past payments stay in your history.')) return;
+      D.fixed = D.fixed.filter((x) => x.id !== id); break;
+    }
+    case 'addGoal': {
+      const name = val('gName'), target = num('gTarget');
+      if (!name) return toast('Enter a goal name.', true);
+      if (!target || target <= 0) return toast('Enter a target amount.', true);
+      D.goals.push({ id: uid(), name, target: toMinor(target), saved: 0 }); break;
+    }
+    case 'saveGoal': {
+      const g = D.goals.find((x) => x.id === id); if (!g) return;
+      const amt = parseFloat(val('g-' + id));
+      if (!amt || amt <= 0) return toast('Enter an amount to add.', true);
+      g.saved = Math.min(g.target, g.saved + toMinor(amt)); break;
+    }
+    case 'delGoal': {
+      if (!confirm('Delete this goal?')) return;
+      D.goals = D.goals.filter((x) => x.id !== id); break;
+    }
+    case 'saveSettings': {
+      settings.cur = val('sCur') || 'EGP';
+      settings.low = parseFloat(val('sLow')) || 0;
+      settings.dueDays = parseInt(val('sDue'), 10) || 2;
+      saveSettings(); toast('Preferences saved'); return render();
+    }
+    case 'changePw': {
+      const cur = $('cpCur').value, p1 = $('cpNew').value, p2 = $('cpNew2').value;
+      if (me.pw !== hash(me.salt + cur)) return toast('Current password is wrong.', true);
+      if (p1.length < 8) return toast('Use at least 8 characters.', true);
+      if (p1 !== p2) return toast('Passwords do not match.', true);
+      me.pw = hash(me.salt + p1); saveUsers();
+      toast('Password changed'); return render();
+    }
+    case 'signOut': return signOut();
+    case 'deleteAcc': {
+      if (!confirm('Permanently delete this account and all its data on this device?')) return;
+      users = users.filter((u) => u.id !== me.id); saveUsers();
+      localStorage.removeItem('sf_data_' + me.id);
+      localStorage.removeItem('sf_settings_' + me.id);
+      return signOut();
+    }
+    default: return;
+  }
+  saveData();
+  render();
+}
+
+// ================= EVENTS =================
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]');
+  if (el) act(el.dataset.act, el);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || me) return;
+  const pick = { login: 'login', signup: 'signup', forgot: 'findUser', reset: 'resetPw' }[ui.mode];
+  const btn = pick && document.querySelector(`[data-act="${pick}"]`);
+  if (btn) btn.click();
+});
+
+// ================= START =================
+(function start() {
+  const sid = localStorage.getItem('sf_session');
+  const user = sid && users.find((u) => u.id === sid);
+  if (user) { me = user; loadData(user.id); processDue(); enterApp(); }
+  else { renderAuth(); }
+})();
+</script>
+</body>
+</html>
